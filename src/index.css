@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    @apply bg-imperial-800 text-gray-100 font-body antialiased;
+    background: radial-gradient(ellipse at top, #1a2744 0%, #0d1525 100%);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  
+  .glass-card-hover {
+    @apply hover:border-gold-500/30 hover:bg-white/10 transition-all duration-300;
+  }
+  
+  .gold-text {
+    background: linear-gradient(135deg, #d4b872 0%, #c9a962 40%, #f5e6c8 50%, #c9a962 60%, #9c7f3d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .gold-border {
+    @apply border border-gold-500/30;
+  }
+  
+  .btn-primary {
+    @apply px-4 py-2 rounded-lg bg-gradient-to-r from-gold-600 to-gold-500 text-imperial-900 font-medium;
+    @apply hover:from-gold-500 hover:to-gold-400 transition-all duration-300 shadow-gold-glow;
+  }
+  
+  .btn-secondary {
+    @apply px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-100;
+    @apply hover:bg-white/10 hover:border-gold-500/30 transition-all duration-300;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-100;
+    @apply focus:outline-none focus:border-gold-500/50 focus:ring-1 focus:ring-gold-500/30 transition-all duration-300;
+  }
+  
+  .status-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .zone-main { background-color: rgba(201, 169, 98, 0.3); border: 1px solid rgba(201, 169, 98, 0.6); }
+  .zone-guest { background-color: rgba(232, 213, 183, 0.3); border: 1px solid rgba(232, 213, 183, 0.6); }
+  .zone-exhibition { background-color: rgba(114, 47, 55, 0.4); border: 1px solid rgba(114, 47, 55, 0.7); }
+  .zone-horse { background-color: rgba(61, 90, 69, 0.4); border: 1px solid rgba(61, 90, 69, 0.7); }
+  .zone-marina { background-color: rgba(46, 94, 139, 0.4); border: 1px solid rgba(46, 94, 139, 0.7); }
+}
+
+@layer utilities {
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animate-blink {
+    animation: blink 1.5s ease-in-out infinite;
+  }
+  
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(201, 169, 98, 0.3) transparent;
+  }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(201, 169, 98, 0.4) 0%, rgba(201, 169, 98, 0.2) 100%);
+  border-radius: 4px;
+  border: 1px solid rgba(201, 169, 98, 0.1);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(201, 169, 98, 0.6) 0%, rgba(201, 169, 98, 0.4) 100%);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
