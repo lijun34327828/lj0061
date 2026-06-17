@@ -318,6 +318,13 @@ export function handleAlert(data: HandleAlertRequest): Promise<Alert> {
   });
 }
 
+export function resolveAlert(id: string): Promise<Alert> {
+  return request<Alert>(`/alerts/${id}/resolve`, {
+    method: 'POST',
+    body: JSON.stringify({ resolvedAt: new Date().toISOString() }),
+  });
+}
+
 export function fetchDashboardSummary(): Promise<DashboardSummary> {
   return request<DashboardSummary>('/dashboard/summary');
 }
