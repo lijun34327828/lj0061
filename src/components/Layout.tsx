@@ -127,14 +127,14 @@ export default function Layout() {
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="relative w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-gold-500/30 transition-all group">
+            <Link to="/alerts" className="relative w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-gold-500/30 transition-all group">
               <Bell className="w-4 h-4 text-gray-400 group-hover:text-gold-400 transition-colors" />
               {highAlerts > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-alert-high text-white text-xs font-bold flex items-center justify-center animate-blink">
                   {highAlerts > 9 ? '9+' : highAlerts}
                 </span>
               )}
-            </button>
+            </Link>
 
             <div className="h-8 w-px bg-white/10" />
 

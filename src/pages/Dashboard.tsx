@@ -90,11 +90,11 @@ export default function Dashboard() {
         />
         <StatCard
           title="在岗人数"
-          value={summary ? `${Math.round((summary.staffOnDuty / summary.totalStaff) * 100)}%` : '0%'}
+          value={summary && summary.totalStaff > 0 ? `${Math.round((summary.staffOnDuty / summary.totalStaff) * 100)}%` : '0%'}
           icon={Users}
           trend={[
-            { label: '在岗', value: `${summary?.staffOnDuty || 0}人`, positive: true },
-            { label: '总数', value: `${summary?.totalStaff || 0}人`, positive: true },
+            { label: '在岗', value: `${summary?.staffOnDuty ?? 0}人`, positive: true },
+            { label: '总数', value: `${summary?.totalStaff ?? 0}人`, positive: true },
           ]}
           sparklineData={[
             { name: '周一', value: 420 }, { name: '周二', value: 445 }, { name: '周三', value: 468 },

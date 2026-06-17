@@ -81,6 +81,7 @@ export default function AlertPanel() {
   const [alerts, setLocalAlerts] = useState<Alert[]>([]);
   const [staff, setStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [priorityFilter, setPriorityFilter] = useState<AlertPriority | 'all'>('all');
   const [typeFilter, setTypeFilter] = useState<AlertType | 'all'>('all');
@@ -94,33 +95,58 @@ export default function AlertPanel() {
 
   useEffect(() => {
     const load = async () => {
-      setLoading(true);
-      const [a, s] = await Promise.all([fetchAlerts(), fetchEstateStaff('estate-1')]);
-      setLocalAlerts(a);
-      setStaff(s);
-      setStoreAlerts(a);
-      setLoading(false);
+      try {
+        setLoading(true);
+        setError(null);
+        const [a, s] = await Promise.all([fetchAlerts(), fetchEstateStaff('estate-1')]);
+        const safeAlerts = Array.isArray(a) ? a : [];
+        const safeStaff = Array.isArray(s) ? s : [];
+        setLocalAlerts(safeAlerts);
+        setStaff(safeStaff);
+        setStoreAlerts(safeAlerts);
+      } catch (err) {
+        console.error('Failed to load alert data:', err);
+        setError(err instanceof Error ? err.message : '加载失败');
+        setLocalAlerts([]);
+        setStaff([]);
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, [setStoreAlerts]);
 
-  const allAlerts = storeAlerts.length > 0 ? storeAlerts : alerts;
+  const safeStoreAlerts = Array.isArray(storeAlerts) ? storeAlerts : [];
+  const allAlerts = safeStoreAlerts.length > 0 ? safeStoreAlerts : alerts;
+
+  const validAlerts = allAlerts.filter((a) =>
+    a && typeof a === 'object' &&
+    typeof a.id === 'string' &&
+    typeof a.title === 'string' &&
+    typeof a.status === 'string' &&
+    typeof a.priority === 'string' &&
+    typeof a.type === 'string'
+  );
 
   const counts = {
-    high: allAlerts.filter((a) => a.priority === 'high' && a.status !== 'resolved').length,
-    medium: allAlerts.filter((a) => a.priority === 'medium' && a.status !== 'resolved').length,
-    low: allAlerts.filter((a) => a.priority === 'low' && a.status !== 'resolved').length,
+    high: validAlerts.filter((a) => a.priority === 'high' && a.status !== 'resolved').length,
+    medium: validAlerts.filter((a) => a.priority === 'medium' && a.status !== 'resolved').length,
+    low: validAlerts.filter((a) => a.priority === 'low' && a.status !== 'resolved').length,
   };
 
-  const filteredAlerts = allAlerts
+  const filteredAlerts = validAlerts
     .filter((a) => priorityFilter === 'all' || a.priority === priorityFilter)
     .filter((a) => typeFilter === 'all' || a.type === typeFilter)
     .filter((a) => statusFilter === 'all' || a.status === statusFilter)
-    .filter((a) => !search || a.title.includes(search) || a.description.includes(search) || (a.estateName?.includes(search)))
+    .filter((a) => !search || a.title.includes(search) || a.description?.includes(search) || (a.estateName?.includes(search)))
     .sort((a, b) => {
-      const ps = { high: 0, medium: 1, low: 2 };
-      if (ps[a.priority] !== ps[b.priority]) return ps[a.priority] - ps[b.priority];
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      const ps: Record<string, number> = { high: 0, medium: 1, low: 2 };
+      const pa = ps[a.priority] ?? 99;
+      const pb = ps[b.priority] ?? 99;
+      if (pa !== pb) return pa - pb;
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return timeB - timeA;
     });
 
   const openHandle = (alertId: string) => {
@@ -264,6 +290,18 @@ export default function AlertPanel() {
       <div className="space-y-3">
         {loading ? (
           <div className="text-center py-16 text-gray-500">加载中...</div>
+        ) : error ? (
+          <div className="glass-card p-16 text-center">
+            <AlertTriangle className="w-12 h-12 mx-auto mb-3 text-alert-high opacity-60" />
+            <div className="text-lg font-medium text-gray-300 mb-1">加载失败</div>
+            <div className="text-sm text-gray-500 mb-4">{error}</div>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-gold-600 to-gold-500 text-imperial-900 hover:from-gold-500 hover:to-gold-400 transition-all"
+            >
+              重新加载
+            </button>
+          </div>
         ) : filteredAlerts.length === 0 ? (
           <div className="glass-card p-16 text-center">
             <CheckCircle className="w-12 h-12 mx-auto mb-3 text-emerald-400 opacity-40" />
@@ -273,11 +311,11 @@ export default function AlertPanel() {
         ) : (
           filteredAlerts.map((alert) => {
             const priorityCfg = priorityOptions.find((p) => p.value === alert.priority);
-            const statusCfg = statusLabelMap[alert.status];
-            const TypeIcon = typeIconMap[alert.type];
+            const statusCfg = statusLabelMap[alert.status as AlertStatus] || statusLabelMap.pending;
+            const TypeIcon = typeIconMap[alert.type as AlertType] || AlertTriangle;
             const isExpanded = expandedAlert === alert.id;
             const isHandling = handlingAlertId === alert.id;
-            const prioritySortIdx = { high: 0, medium: 1, low: 2 }[alert.priority];
+            const prioritySortIdx = ({ high: 0, medium: 1, low: 2 } as Record<string, number>)[alert.priority] ?? 99;
 
             return (
               <div
